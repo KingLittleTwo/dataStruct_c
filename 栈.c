@@ -1,8 +1,15 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "header.h"
-
 /** 
+ * 栈（stack）： 是仅在表尾（栈顶）进行插入和删除操作的线性表(last in first out) LIFO
+ * 允许插入和删除操作的一端称为栈顶（top），另一端称为栈底（bottom），不含任何
+ * 数据元素的栈称为空栈，栈又称为先进后出的线性表，简称LIFO结构
+ *  
+ * 注意：最新进栈的不一定最后出，因为存在进一个出一个的情况 
+ *      例如：1、2、3进，3、2、1出；
+ *           1进，1出，2进，2出，3进，3出
+ */
+// ======================================================================== //
+/**  
+ 应用
 1.函数调用 :在函数f中调用另一个g函数，在g函数中调用k函数
 执行到要调用g函数位置，先把g函数执行后下一句的地址以及变量压栈，
 执行g函数，执行到调用k函数的位置，再把k函数执行后的下一句压栈，
@@ -12,7 +19,11 @@
 4.内存分配：把函数形参压入栈中
 5.缓冲处理
 6.走迷宫
- */
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include "header.h"
+
 /** 
  * @brief  
  * @note    定义节点的结构体  
@@ -45,6 +56,11 @@ void initStack(PStack stack)
 {
     // 建立一个头结点作为栈底
     stack->bottom = malloc(sizeof(Stack));
+    if (stack == NULL)
+    {
+        printf("内存分配失败\n");
+        exit(ERROR);
+    }
     stack->top = stack->bottom;
     stack->top->next = NULL;
 }
@@ -80,12 +96,20 @@ void traverse(PStack stack)
  * @param  val: 
  * @retval None
  */
-void push(PStack stack, int val)
+status push(PStack stack, int val)
 {
     PNode p = malloc(sizeof(Node)); // 生成一个新结点
+    if (p->next == NULL)
+    {
+        printf("动态内存分配失败\n");
+        return FALSE;
+    }
     p->data = val;
     p->next = stack->top; // NULL
     stack->top = p;
+    if (stack->top != NULL)
+        return TRUE;
+    return FALSE;
 }
 /** 
  * @brief  
@@ -94,17 +118,19 @@ void push(PStack stack, int val)
  * @param  val: 
  * @retval None
  */
-void pop(PStack stack)
+status pop(PStack stack)
 {
     if (stack->top == stack->bottom)
     {
         printf("栈为空，无法完成出栈操作\n");
-        return;
+        return FALSE;
     }
     PNode p = stack->top;
     stack->top = stack->top->next;
     free(p);
-    p = NULL;
+    if (p == NULL)
+        return TRUE;
+    return FALSE;
 }
 
 /** 
@@ -115,12 +141,17 @@ void pop(PStack stack)
  */
 void clear(PStack ps)
 {
+    // 栈顶和栈底不相等时，循环
     while (ps->top != ps->bottom)
     {
-        PNext temp = ps->top;
-        ps->top = ps->top->PNext;
+        // 使一个新结点和栈顶指向同一地址
+        PNode temp = ps->top;
+        // 使栈顶指向下一个结点
+        ps->top = ps->top->next;
+        // 释放掉以前的栈顶空间
         free(temp);
     }
+    return ;
 }
 
 int main()
