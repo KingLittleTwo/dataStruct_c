@@ -69,8 +69,7 @@ LinkQueue initQueue()
     LinkQueue *lq = (LinkQueue *)malloc(sizeof(LinkQueue));
     if (lq == NULL)
         printf("内存分配失败");
-    lq->front = NULL;
-    lq->rear = NULL;
+    lq->front->next = NULL;
     return *lq;
 }
 status isEmpty(LinkQueue *lq)
@@ -98,11 +97,11 @@ status EnQueue(LinkQueue *queue, int e)
         queue->front = queue->rear = p; // 如果第一次插入则设置头指针和尾指针都为p
     queue->rear->next = p;  
     queue->rear = p;        // 队尾指向新节点
-    return OK;
+    return TRUE;
 }
 /** 
  * @brief  
- * @note   元素出队列的操作
+ * @note   元素出队列的操作, 队列不为空删除队头元素用e返回其值
  * @param  *queue: 
  * @param  *e: 
  * @retval 
@@ -120,6 +119,18 @@ status DeQueue(LinkQueue *queue, int *e)
     free(p);
     return TRUE;
 }
+/**
+ * 销毁队列
+ */
+void destoryQueue(LinkQueue *queue)
+{
+    while(queue->front)
+    {
+        queue->rear = queue->front->next;
+        free(queue->front);
+        queue->front = queue->rear;
+    }
+}
 void traverse(LinkQueue *lq)
 {
     if (lq->front == NULL || lq->rear == NULL)
@@ -133,9 +144,6 @@ void traverse(LinkQueue *lq)
 int main()
 {
     LinkQueue queue = initQueue();
-    if (queue.front == NULL)
-        printf("队列为空");
     printf("%d\n", queue.front->data);
-    getchar();
     return 0;
 }
